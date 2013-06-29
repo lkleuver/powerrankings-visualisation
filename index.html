@@ -49,7 +49,7 @@
 
     var xAxis = d3.svg.axis()
         .scale(x)
-        .orient("top");
+        .orient("bottom");
 
     var svg = d3.select("body").append("svg")
         .attr("width", width + margin.left + margin.right)
@@ -57,7 +57,8 @@
       .append("g")
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
     
-    
+    var _clipspace = 14;
+    var _taken = [];
     
     d3.json("data/women2.json", function(data) {
       console.log(data);
@@ -70,7 +71,7 @@
         .attr("class", "label team")
         .attr("text-anchor", "start")
         .attr("transform", function(d) {
-          return  "translate(" + x(d.strength) + ", -40) " +
+          return  "translate(" + unclip(x(d.strength)) + ", -30) " +
                   "rotate(-65)"
         })
         .text(function(d) { return d.name;})
@@ -79,6 +80,15 @@
           showBarChartForTeam(d.games, d.strength, d.name);
         });
 
+        
+        svg.selectAll("line")
+        .data(data)
+        .enter().append("line")
+        .attr("x1", function(d) { return x(d.strength); })
+        .attr("x2", function(d) { return x(d.strength); })
+        .attr("y1", 0)
+        .attr("y2", -25)
+        .style("stroke", "#000");
       
       svg.append("g")
           .attr("class", "x axis")
@@ -90,6 +100,8 @@
           .attr("x1", x(0))
           .attr("x2", x(0))
           .attr("y2", height);
+          
+      
     });
     
     var showBarChartForTeam = function(data, s, name) {
@@ -106,7 +118,7 @@
           .attr("x", function(d) { return x(Math.min(s, s + -1 * d.point_diff)); })
           .attr("y", function(d) { return y(d.id); })
           .attr("width", function(d) { return Math.abs(x(d.point_diff) - x(0)); })
-          .attr("height", 20);
+          .attr("height", y.rangeBand());
           
       svg.selectAll(".bar2")
           .data(data)
@@ -130,6 +142,43 @@
 
     };
     
+    
+    var unclip = function(x) {
+      for(var i = 0; i < _taken.length; i++) {
+        var v = _taken[i];
+        if(x < v && x > v - _clipspace) {
+          return unclipDrift(x - _clipspace, i-1, -1);
+        }
+        if(x > v && x < v + _clipspace) {
+          return unclipDrift(x + _clipspace, i+1 + 1);
+        }
+      }
+      _taken.push(x);
+      return x;
+    };
+    
+    
+    //this can be done smarter, i'm sure.
+    var unclipDrift = function(x, index, dir) {
+      if(dir > 0) {
+        for(var i = index; i < _taken.length; i++) {
+          var v = _taken[i];
+          if(x > v && x < v + _clipspace) {
+            return unclipDrift(x + _clipspace, i+1, 1);
+          }
+        }
+      }else{
+        for(var i = index; i < _taken.length; i++) {
+          var v = _taken[i];
+          if(x < v && x > v - _clipspace) {
+            return unclipDrift(x - _clipspace, i-1, -1);
+          }
+        }
+      }
+      
+      _taken.push(x);
+      return x;
+    };
     
     
     </script>
