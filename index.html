@@ -115,7 +115,8 @@
           .data(data)
         .enter().append("rect")
           .attr("class", "bar")
-          .attr("x", function(d) { return x(Math.min(s, s + -1 * d.point_diff)); })
+//          .attr("x", function(d) { return x(Math.min(s, s + -1 * d.point_diff)); })
+          .attr("x", function(d) { return x(Math.min(d.opponent.strength[7], d.opponent.strength[7] + d.point_diff)); })
           .attr("y", function(d) { return y(d.id); })
           .attr("width", function(d) { return Math.abs(x(d.point_diff) - x(0)); })
           .attr("height", y.rangeBand());
