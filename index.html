@@ -26,7 +26,7 @@
       }
       
       .opponent-label {
-        fill: #fff;
+        fill: blue;
       }
     </style>
   </head>
@@ -59,6 +59,8 @@
     
     var _clipspace = 14;
     var _taken = [];
+    
+    var _arrowspace = 20;
     
     d3.json("data/19178.json", function(data) {
       console.log(data);
@@ -107,10 +109,10 @@
     var showBarChartForTeam = function(data, s, name) {
       y.domain(data.map(function(d) { return d.id }));
       
-      svg.selectAll(".bar").remove();
-      svg.selectAll(".bar2").remove();
+      svg.selectAll(".arrow").remove();
       svg.selectAll(".opponent-label").remove();
       
+      /*
       svg.selectAll(".bar")
           .data(data)
         .enter().append("rect")
@@ -120,7 +122,26 @@
           .attr("y", function(d) { return y(d.id); })
           .attr("width", function(d) { return Math.abs(x(d.point_diff) - x(0)); })
           .attr("height", y.rangeBand());
-          
+      */
+      
+      svg.selectAll(".arrow")
+          .data(data)
+        .enter().append("polygon")
+          .attr("class", "arrow")
+          .attr("points", function(d) { return drawArrow(
+                x(Math.min(d.opponent.strength[7], d.opponent.strength[7] + d.point_diff)),
+                y(d.id),
+                Math.abs(x(d.point_diff) - x(0)),
+                y.rangeBand(),
+                d.point_diff > 0 ? -1 : 1
+              );
+          })
+          .attr("stroke","black")
+          .attr("stroke-width",2);
+      
+      
+      
+          /* own to opponent strength line unused now.
       svg.selectAll(".bar2")
           .data(data)
         .enter().append("rect")
@@ -129,13 +150,13 @@
           .attr("y", function(d) { return y(d.id); })
           .attr("width", function(d) { return Math.abs( x(s - d.opponent.strength[7]) - x(0) ); })
           .attr("height", 4);
-
+          */
 
       svg.selectAll(".opponent-label")
           .data(data)
         .enter().append("text")
           .attr("class", "opponent-label")
-          .attr("x", function(d) { return x(Math.min(s, s + -1 * d.point_diff)) + Math.abs(x(d.point_diff) - x(0)); })
+          .attr("x", function(d) { return x(Math.min(d.opponent.strength[7], d.opponent.strength[7] + d.point_diff)); })
           .attr("y", function(d) { return y(d.id) + 14; })
           .attr("text-anchor", "end")
           .attr("dx", -10)
@@ -143,6 +164,30 @@
 
     };
     
+    
+    var drawArrow = function(x, y, width, height, dir) {
+      var points = [];
+      
+      var middlePoint = height / 2;
+      var leftIndent = dir < 0 ? _arrowspace : 0;
+      var rightIndent = dir > 0 ? -1 * _arrowspace : 0;
+      
+      //lt
+      points.push( [x + leftIndent ,y].join(",") );
+      //rt
+      points.push( [x + width + rightIndent, y].join(",") );
+      //rm
+      points.push( [x + width, y + middlePoint].join(",") );
+      //rb
+      points.push( [x + width + rightIndent, y + height].join(",") );
+      //lb
+      points.push( [x + leftIndent, y + height].join(",") );
+      //lm
+      points.push( [x, y + middlePoint].join(",") );
+      
+
+      return points.join(" ");
+    };
     
     var unclip = function(x) {
       for(var i = 0; i < _taken.length; i++) {
