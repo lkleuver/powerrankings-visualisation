@@ -36,7 +36,7 @@
     var windowWidth = $(window).width();
     var windowHeight = $(window).height();
     
-    var margin = {top: 200, right: 200, bottom: 50, left: 200},
+    var margin = {top: 200, right: 100, bottom: 50, left: 100},
         width = windowWidth - margin.left - margin.right,
         height = windowHeight - margin.top - margin.bottom;
     
@@ -60,9 +60,9 @@
     var _clipspace = 14;
     var _taken = [];
     
-    d3.json("data/women2.json", function(data) {
+    d3.json("data/19178.json", function(data) {
       console.log(data);
-      x.domain(d3.extent(data, function(d) { return d.strength; })).nice();
+      x.domain(d3.extent(data, function(d) { return d.strength[7]; })).nice();
 
       
       svg.selectAll(".label")
@@ -71,21 +71,21 @@
         .attr("class", "label team")
         .attr("text-anchor", "start")
         .attr("transform", function(d) {
-          return  "translate(" + unclip(x(d.strength)) + ", -30) " +
+          return  "translate(" + unclip(x(d.strength[7])) + ", -30) " +
                   "rotate(-65)"
         })
         .text(function(d) { return d.name;})
         .on("click", function(d) {
           console.log(d);
-          showBarChartForTeam(d.games, d.strength, d.name);
+          showBarChartForTeam(d.games, d.strength[7], d.name);
         });
 
         
         svg.selectAll("line")
         .data(data)
         .enter().append("line")
-        .attr("x1", function(d) { return x(d.strength); })
-        .attr("x2", function(d) { return x(d.strength); })
+        .attr("x1", function(d) { return x(d.strength[7]); })
+        .attr("x2", function(d) { return x(d.strength[7]); })
         .attr("y1", 0)
         .attr("y2", -25)
         .style("stroke", "#000");
@@ -124,9 +124,9 @@
           .data(data)
         .enter().append("rect")
           .attr("class", "bar2")
-          .attr("x", function(d) { return x(Math.min(s, d.opponent.strength)); })
+          .attr("x", function(d) { return x(Math.min(s, d.opponent.strength[7])); })
           .attr("y", function(d) { return y(d.id); })
-          .attr("width", function(d) { return Math.abs( x(s - d.opponent.strength) - x(0) ); })
+          .attr("width", function(d) { return Math.abs( x(s - d.opponent.strength[7]) - x(0) ); })
           .attr("height", 4);
 
 
