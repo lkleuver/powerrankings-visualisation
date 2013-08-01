@@ -71,6 +71,7 @@
         .data(data)
       .enter().append("text")
         .attr("class", "label team")
+        .attr("id", function(d) { return "team-" + d.id; })
         .attr("text-anchor", "start")
         .attr("transform", function(d) {
           return  "translate(" + unclip(x(d.strength[7])) + ", -30) " +
@@ -78,7 +79,6 @@
         })
         .text(function(d) { return d.name;})
         .on("click", function(d) {
-          console.log(d);
           showBarChartForTeam(d.games, d.strength[7], d.name);
         });
 
@@ -133,7 +133,7 @@
                 y(d.id),
                 Math.abs(x(d.point_diff) - x(0)),
                 y.rangeBand(),
-                d.point_diff > 0 ? 1 : -1
+                d.point_diff > 0 ? -1 : 1
               );
           })
           .attr("stroke","black")
